@@ -1,0 +1,83 @@
+<div>
+<h2 id="fiche">L'évasion de l'octogone</h2>
+<p><b>Règles :</b> lis le paragraphe indiqué, suis les liens, et mets ta fiche à jour toi-même. Si tes PV tombent à 0, tu as perdu.</p>
+
+<form>
+<p>
+PV :
+<select>
+<option>3 ❤❤❤</option>
+<option>2 ❤❤</option>
+<option>1 ❤</option>
+<option>0 (perdu)</option>
+</select>
+&nbsp; Objets :
+<label><input type="checkbox"> Bouclier</label>
+<label><input type="checkbox"> Clé</label>
+&nbsp; <input type="reset" value="Recommencer">
+</p>
+</form>
+<p><a href="#p1">▶ Commencer au paragraphe 1</a></p>
+<hr>
+
+<h3 id="p1">1. L'arène</h3>
+<p>Tu te réveilles au centre d'une arène à huit côtés. Trois portes s'offrent à toi.</p>
+<p>
+<a href="#p2">Porte nord</a> ·
+<a href="#p3">Porte est</a> ·
+<a href="#p4">Porte sud</a> ·
+<a href="#p5">Porte ouest</a>
+</p>
+<hr>
+
+<h3 id="p2">2. L'armurerie</h3>
+<p>Une petite salle, un bouclier accroché au mur. <b>Coche « Bouclier »</b> sur ta fiche. Sur le mur est gravé : « Octogone, triangle, carré : compte leurs côtés. »</p>
+<p><a href="#p1">Retourner à l'arène (1)</a></p>
+<hr>
+
+<h3 id="p3">3. Le gardien carré</h3>
+<p>Un carré géant garde un coffre.</p>
+<p>
+<a href="#p6">J'ai le bouclier : j'attaque (6)</a><br>
+<a href="#p7">Je n'ai pas le bouclier : j'attaque quand même (7)</a>
+</p>
+<hr>
+
+<h3 id="p4">4. La porte verrouillée</h3>
+<p>Une porte avec un code à trois chiffres. Un seul code la fait s'ouvrir.</p>
+<form action="#p8">
+<p>
+<label>Code : <input type="text" required pattern="834" maxlength="3" size="4" inputmode="numeric"></label>
+<input type="submit" value="Ouvrir">
+</p>
+</form>
+<p>Si le code est faux, rien ne se passe. <a href="#p1">Retourner à l'arène (1)</a></p>
+<hr>
+
+<h3 id="p5">5. Le piège</h3>
+<p>Un pentagone surgit de l'ombre et te blesse. <b>Perds 1 PV</b> sur ta fiche, puis recule.</p>
+<p><a href="#p1">Retourner à l'arène (1)</a></p>
+<hr>
+
+<h3 id="p6">6. Le coffre</h3>
+<p>Ton bouclier repousse le carré. Tu ouvres le coffre et trouves une clé. <b>Coche « Clé »</b> sur ta fiche.</p>
+<p><a href="#p1">Retourner à l'arène (1)</a></p>
+<hr>
+
+<h3 id="p7">7. Le coffre (à mains nues)</h3>
+<p>Le carré te frappe. <b>Perds 1 PV</b>. Il s'écarte enfin et tu ouvres le coffre : une clé. <b>Coche « Clé »</b>.</p>
+<p><a href="#p1">Retourner à l'arène (1)</a></p>
+<hr>
+
+<h3 id="p8">8. Dernière porte</h3>
+<p>La porte du code s'ouvre sur une grande sortie fermée à clé.</p>
+<p>
+<a href="#p10">J'ai la clé (10)</a><br>
+<a href="#p1">Je n'ai pas la clé : je retourne à l'arène (1)</a>
+</p>
+<hr>
+
+<h3 id="p10">10. Victoire !</h3>
+<p>La clé tourne, la sortie s'ouvre, et tu quittes l'arène. <b>Bravo !</b></p>
+<p><a href="#fiche">Rejouer</a> (pense à cliquer sur « Recommencer »).</p>
+</div>
