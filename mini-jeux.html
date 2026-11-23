@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mini-jeux</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font:14px "Trebuchet MS",Verdana,sans-serif}
+#app{width:640px;height:400px;max-width:100%;background:#1d2b4f;color:#e8eefc;border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
+nav{display:flex;background:#16213d}
+nav button{flex:1;padding:10px;border:0;border-bottom:3px solid transparent;background:none;color:#9fb0d8;font:inherit;cursor:pointer}
+nav button[aria-selected=true]{color:#fff;border-color:#ff6b57}
+section{flex:1;display:none;align-items:center;justify-content:center;gap:24px;padding:12px}
+section.on{display:flex}
+.side{width:150px;display:flex;flex-direction:column;gap:10px}
+.side p{margin:0;line-height:1.4}
+.h{color:#9fb0d8;font-size:13px}
+.b{padding:8px 12px;border:0;border-radius:6px;background:#ff6b57;color:#fff;font:inherit;cursor:pointer}
+canvas{background:#16213d;border-radius:6px;touch-action:none;max-width:100%}
+#tg{display:grid;grid-template-columns:repeat(3,96px);gap:6px}
+.x{width:96px;height:96px;border:0;border-radius:6px;background:#16213d;font:bold 44px "Trebuchet MS",sans-serif;cursor:pointer}
+#mg{display:grid;grid-template-columns:repeat(4,72px);gap:6px}
+.c{width:72px;height:72px;border:0;border-radius:6px;background:#2f437a;color:#16213d;font-size:30px;cursor:pointer}
+.c.m{opacity:.5}
+button:focus-visible{outline:2px solid #3ddc97;outline-offset:2px}
+@media(max-width:560px){#app{height:auto;min-height:400px}section.on{flex-direction:column}}
+</style>
+</head>
+<body>
+<div id="app">
+  <nav role="tablist">
+    <button role="tab" aria-selected="true" onclick="tab(0)">Snake</button>
+    <button role="tab" aria-selected="false" onclick="tab(1)">Morpion</button>
+    <button role="tab" aria-selected="false" onclick="tab(2)">Mémoire</button>
+  </nav>
+
+  <section id="snake" class="on">
+    <canvas id="sn" width="320" height="320" aria-label="Plateau de Snake"></canvas>
+    <div class="side">
+      <p>Score : <b id="ss">0</b></p>
+      <p>Record : <b id="sb">0</b></p>
+      <button class="b" onclick="snStart()">Jouer</button>
+      <p class="h">Flèches, ZQSD ou glisse le doigt sur le plateau.</p>
+    </div>
+  </section>
+
+  <section id="ttt">
+    <div id="tg"></div>
+    <div class="side">
+      <p id="tm" aria-live="polite">À toi de jouer (X).</p>
+      <p id="ts" class="h"></p>
+      <button class="b" onclick="tnew()">Nouvelle partie</button>
+    </div>
+  </section>
+
+  <section id="mem">
+    <div id="mg"></div>
+    <div class="side">
+      <p id="mm" aria-live="polite">0 coup</p>
+      <button class="b" onclick="mnew()">Rejouer</button>
+      <p class="h">Retrouve les 8 paires en un minimum de coups.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+function tab(n){
+  document.querySelectorAll('nav button').forEach((b,i)=>b.setAttribute('aria-selected',i==n));
+  document.querySelectorAll('section').forEach((s,i)=>s.classList.toggle('on',i==n));
+  if(n!=0)snStop();
+}
+
+/* ---------- Snake ---------- */
+const sc=$('sn'),g=sc.getContext('2d'),N=16,S=20;
+let sn=[{x:8,y:8},{x:7,y:8},{x:6,y:8}],food={x:12,y:8},dir={x:1,y:0},nd=dir,sco=0,best=0,tm=null;
+function snStart(){
+  sn=[{x:8,y:8},{x:7,y:8},{x:6,y:8}];dir=nd={x:1,y:0};sco=0;put();snInfo();
+  clearInterval(tm);tm=setInterval(step,120);draw();
+}
+function put(){do{food={x:Math.random()*N|0,y:Math.random()*N|0}}while(sn.some(p=>p.x==food.x&&p.y==food.y))}
+function snInfo(){$('ss').textContent=sco;$('sb').textContent=best}
+function step(){
+  dir=nd;const h={x:sn[0].x+dir.x,y:sn[0].y+dir.y};
+  if(h.x<0||h.y<0||h.x>=N||h.y>=N||sn.some(p=>p.x==h.x&&p.y==h.y)){
+    clearInterval(tm);tm=null;best=Math.max(best,sco);snInfo();draw('Perdu ! Score : '+sco);return;
+  }
+  sn.unshift(h);
+  if(h.x==food.x&&h.y==food.y){sco++;put();snInfo()}else sn.pop();
+  draw();
+}
+function draw(msg){
+  g.fillStyle='#16213d';g.fillRect(0,0,320,320);
+  g.fillStyle='#ff6b57';g.fillRect(food.x*S+3,food.y*S+3,14,14);
+  g.fillStyle='#3ddc97';sn.forEach(p=>g.fillRect(p.x*S+1,p.y*S+1,18,18));
+  if(msg){
+    g.fillStyle='rgba(22,33,61,.8)';g.fillRect(0,130,320,60);
+    g.fillStyle='#fff';g.font='bold 18px "Trebuchet MS",sans-serif';g.textAlign='center';g.fillText(msg,160,166);
+  }
+}
+function snStop(){if(tm){clearInterval(tm);tm=null;draw('Pause : clique sur Jouer')}}
+function turn(d){if(!tm||(d.x==-dir.x&&d.y==-dir.y))return;nd=d}
+const K={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0],w:[0,-1],z:[0,-1],s:[0,1],a:[-1,0],q:[-1,0],d:[1,0]};
+addEventListener('keydown',e=>{
+  if(!$('snake').classList.contains('on'))return;
+  const k=K[e.key];if(!k)return;e.preventDefault();turn({x:k[0],y:k[1]});
+});
+let t0;
+sc.addEventListener('touchstart',e=>{t0=e.touches[0]},{passive:true});
+sc.addEventListener('touchend',e=>{
+  const t=e.changedTouches[0],dx=t.clientX-t0.clientX,dy=t.clientY-t0.clientY;
+  if(Math.max(Math.abs(dx),Math.abs(dy))<20)return;
+  turn(Math.abs(dx)>Math.abs(dy)?{x:Math.sign(dx),y:0}:{x:0,y:Math.sign(dy)});
+},{passive:true});
+snInfo();draw('Clique sur Jouer');
+
+/* ---------- Morpion (toi = X, l'ordi = O) ---------- */
+const L=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+let tb=[],tdone=0,tsc={x:0,o:0,d:0};
+const tcells=[];
+for(let i=0;i<9;i++){
+  const e=document.createElement('button');e.className='x';e.onclick=()=>tplay(i);
+  $('tg').append(e);tcells.push(e);
+}
+function win(b){
+  for(const l of L)if(b[l[0]]&&b[l[0]]==b[l[1]]&&b[l[0]]==b[l[2]])return b[l[0]];
+  return b.every(Boolean)?'=':0;
+}
+function mm(b,p){
+  const w=win(b);if(w=='X')return 1;if(w=='O')return -1;if(w=='=')return 0;
+  let best=p=='X'?-2:2;
+  b.forEach((v,i)=>{if(!v){b[i]=p;const s=mm(b,p=='X'?'O':'X');b[i]='';best=p=='X'?Math.max(best,s):Math.min(best,s)}});
+  return best;
+}
+function trender(){
+  tcells.forEach((e,i)=>{
+    const v=tb[i];e.textContent=v;e.style.color=v=='X'?'#3ddc97':'#ff6b57';
+    e.setAttribute('aria-label','Case '+(i+1)+(v?' : '+v:' vide'));
+  });
+  $('ts').textContent='Toi '+tsc.x+' · Ordi '+tsc.o+' · Nuls '+tsc.d;
+}
+function tend(){
+  const w=win(tb);if(!w)return false;tdone=1;
+  if(w=='X'){tsc.x++;$('tm').textContent='Tu as gagné !'}
+  else if(w=='O'){tsc.o++;$('tm').textContent="L'ordi a gagné."}
+  else{tsc.d++;$('tm').textContent='Égalité.'}
+  return true;
+}
+function tplay(i){
+  if(tb[i]||tdone)return;
+  tb[i]='X';
+  if(!tend()){
+    $('tm').textContent="L'ordi réfléchit…";
+    setTimeout(()=>{
+      if(tdone)return;
+      const free=tb.map((v,j)=>v?-1:j).filter(j=>j>=0);
+      let pick=free[Math.random()*free.length|0];
+      if(Math.random()>.3){
+        let bs=2;
+        free.forEach(j=>{tb[j]='O';const s=mm(tb,'X');tb[j]='';if(s<bs){bs=s;pick=j}});
+      }
+      tb[pick]='O';
+      if(!tend())$('tm').textContent='À toi de jouer (X).';
+      trender();
+    },300);
+  }
+  trender();
+}
+function tnew(){tb=Array(9).fill('');tdone=0;$('tm').textContent='À toi de jouer (X).';trender()}
+tnew();
+
+/* ---------- Mémoire ---------- */
+const M=['▲','●','■','◆','★','✚','⬢','☾'],MC=['#ff6b57','#3ddc97','#6ea8ff','#ffc857','#c792ea','#4dd0e1','#f78fb3','#b8e986'];
+let mc=[],mopen=[],mlock=0,mmoves=0,mfound=0;
+const mcells=[];
+for(let i=0;i<16;i++){
+  const e=document.createElement('button');e.className='c';e.onclick=()=>mflip(i);
+  $('mg').append(e);mcells.push(e);
+}
+function mr(){
+  mcells.forEach((e,i)=>{
+    const c=mc[i],show=c.o||c.m;
+    e.textContent=show?M[c.v]:'';
+    e.style.background=show?MC[c.v]:'';
+    e.classList.toggle('m',!!c.m);
+    e.setAttribute('aria-label',show?'Carte '+M[c.v]:'Carte cachée '+(i+1));
+  });
+}
+function mnew(){
+  mc=[...Array(8).keys(),...Array(8).keys()].sort(()=>Math.random()-.5).map(v=>({v,o:0,m:0}));
+  mopen=[];mlock=0;mmoves=0;mfound=0;$('mm').textContent='0 coup';mr();
+}
+function mflip(i){
+  const c=mc[i];if(mlock||c.o||c.m)return;
+  c.o=1;mopen.push(i);
+  if(mopen.length==2){
+    mmoves++;$('mm').textContent=mmoves+(mmoves>1?' coups':' coup');
+    const [a,b]=mopen;
+    if(mc[a].v==mc[b].v){
+      mc[a].m=mc[b].m=1;mc[a].o=mc[b].o=0;mopen=[];mfound++;
+      if(mfound==8)$('mm').textContent='Gagné en '+mmoves+' coups !';
+    }else{
+      mlock=1;
+      setTimeout(()=>{mc[a].o=mc[b].o=0;mopen=[];mlock=0;mr()},800);
+    }
+  }
+  mr();
+}
+mnew();
+</script>
+</body>
+</html>
